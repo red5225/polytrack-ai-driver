@@ -1,26 +1,53 @@
-name: Build Intel Mac app
+name: Build lightweight Intel Mac app
+
 on:
   push:
     branches: [main]
   workflow_dispatch:
+
 permissions:
   contents: read
+
 jobs:
   build:
-    runs-on: macos-15-intel
+    runs-on: macos-13
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm install
-      - name: Syntax checks
-        run: npm run check
-      - name: Package x64 macOS app
-        run: npm run dist:mac:x64
+
+      - name: Build native x86_64 app
+        shell: bash
+        run: |
+          set -euo pipefail
+          APP="dist/PolyTrack AI Driver.app"
+          mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+          cp src/ai/inject.js "$APP/Contents/Resources/ai.js"
+          cat > "$APP/Contents/Info.plist" <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>CFBundleExecutable</key><string>PolyTrackAI</string>
+            <key>CFBundleIdentifier</key><string>com.red5225.polytrack-ai-driver</string>
+            <key>CFBundleName</key><string>PolyTrack AI Driver</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>CFBundleShortVersionString</key><string>0.2.0</string>
+            <key>CFBundleVersion</key><string>2</string>
+            <key>LSMinimumSystemVersion</key><string>12.0</string>
+            <key>NSHighResolutionCapable</key><true/>
+          </dict></plist>
+          PLIST
+          swiftc -O -target x86_64-apple-macosx12.0 -framework Cocoa -framework WebKit Sources/main.swift -o "$APP/Contents/MacOS/PolyTrackAI"
+          /usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$APP/Contents/Info.plist"
+          mkdir -p dist
+          ditto -c -k --sequesterRsrc --keepParent "$APP" "dist/PolyTrack-AI-Driver-Intel.zip"
+          hdiutil create -quiet -volname "PolyTrack AI Driver" -srcfolder "$APP" -ov -format UDZO "dist/PolyTrack-AI-Driver-Intel.dmg"
+          echo "Packaged app size:"
+          du -sh "$APP" dist/PolyTrack-AI-Driver-Intel.zip dist/PolyTrack-AI-Driver-Intel.dmg
+
       - name: Upload app packages
         uses: actions/upload-artifact@v4
         with:
-          name: PolyTrack-AI-Driver-macOS-Intel
-          path: dist/*
+          name: PolyTrack-AI-Driver-Intel-macOS-Monterey
+          path: |
+            dist/PolyTrack-AI-Driver-Intel.zip
+            dist/PolyTrack-AI-Driver-Intel.dmg
           if-no-files-found: error
