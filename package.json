@@ -4,7 +4,26 @@
   "description": "Experimental learning-based auto-driver overlay for PolyTrack",
   "main": "src/main.js",
   "private": true,
-  "scripts": {"start": "electron .", "dist:mac:x64": "electron-builder --mac dmg zip --x64", "check": "node --check src/main.js && node --check src/preload.js && node --check src/ai/inject.js"},
-  "devDependencies": {"electron": "28.3.3", "electron-builder": "24.13.3"},
-  "build": {"appId": "com.red5225.polytrackaidriver", "productName": "PolyTrack AI Driver", "asar": true, "mac": {"target": ["dmg", "zip"], "category": "public.app-category.games", "artifactName": "PolyTrack-AI-Driver-${version}-mac-${arch}.${ext}", "minimumSystemVersion": "12.0.0"}, "directories": {"output": "dist"}, "files": ["src/**/*", "package.json"]}
+  "scripts": {
+    "start": "electron .",
+    "dist:mac:x64": "electron-builder --mac dmg zip --x64 --publish never",
+    "check": "node --check src/main.js && node --check src/preload.js && node --check src/ai/inject.js"
+  },
+  "devDependencies": {
+    "electron": "28.3.3",
+    "electron-builder": "24.13.3"
+  },
+  "build": {
+    "appId": "com.red5225.polytrackaidriver",
+    "productName": "PolyTrack AI Driver",
+    "asar": true,
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.games",
+      "artifactName": "PolyTrack-AI-Driver-${version}-mac-${arch}.${ext}",
+      "minimumSystemVersion": "12.0.0"
+    },
+    "directories": { "output": "dist" },
+    "files": ["src/**/*", "package.json"]
+  }
 }
