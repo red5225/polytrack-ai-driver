@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   build:
-    runs-on: macos-13
+    runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +37,6 @@ jobs:
           PLIST
           swiftc -O -target x86_64-apple-macosx12.0 -framework Cocoa -framework WebKit Sources/main.swift -o "$APP/Contents/MacOS/PolyTrackAI"
           /usr/libexec/PlistBuddy -c "Print :CFBundleExecutable" "$APP/Contents/Info.plist"
-          mkdir -p dist
           ditto -c -k --sequesterRsrc --keepParent "$APP" "dist/PolyTrack-AI-Driver-Intel.zip"
           hdiutil create -quiet -volname "PolyTrack AI Driver" -srcfolder "$APP" -ov -format UDZO "dist/PolyTrack-AI-Driver-Intel.dmg"
           echo "Packaged app size:"
