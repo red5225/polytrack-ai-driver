@@ -1,0 +1,27 @@
+name: Build Intel Mac app
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm install
+      - name: Syntax checks
+        run: npm run check
+      - name: Package x64 macOS app
+        run: npm run dist:mac:x64
+      - name: Upload app packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: PolyTrack-AI-Driver-macOS-Intel
+          path: dist/*
+          if-no-files-found: error
